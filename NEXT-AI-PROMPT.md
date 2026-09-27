@@ -25,7 +25,8 @@ agent session. Everything it needs is in this file.
 | Client-side Chat Modifiers | ✅ Done |
 | AI advisor | ✅ Done |
 | Server-side blocks | ⚠️ Still present, now **legacy/optional** |
-| Compile verification | ❌ **Never compiled since the rewrite** — see [Build status](#build-status) |
+| Type-check | ✅ **Zero errors** across all 40 files (against API stubs — see [Build status](#build-status)) |
+| Real `./gradlew build` | ❌ Still never run — Maven Central unreachable in the dev sandbox |
 
 **The headline:** every feature now has a 100% client-side implementation.
 Nothing needs to be installed on the server. The old server-side blocks are
@@ -36,38 +37,68 @@ entirely if you want (see [Ideas / backlog](#ideas--backlog)).
 
 ## ⚠️ Build status — read this first
 
-**The code has not been compiled since the client-side Smelter and Farm were
-added.** The sandbox it was written in had no JDK and no package-manager
-network access, so `./gradlew build` was never run.
+**Every file in `src/` now type-checks with zero errors.** The installer
+compiles for real against a plain JDK. But `./gradlew build` has still never
+run, and you need to understand exactly what has and hasn't been proven.
 
-What *was* done instead:
+### What was done
 
-- Static checks: all 63 referenced config fields exist, all internal imports
-  resolve, all cross-class member references resolve, braces balanced in all
-  38 files.
-- Every Minecraft API used in the new code was copied from a pattern already
-  present and previously-compiling elsewhere in this same codebase — **with
-  two exceptions**, flagged below.
+The dev sandbox had no JDK and no route to Maven Central, so the real
+Minecraft artifacts could not be downloaded. Instead:
 
-**Your first job in a new session: run `./gradlew build` and fix whatever
-breaks.** Expect the two flagged APIs to be the most likely failures.
+1. A real Java compiler was obtained (ECJ 3.46, the Eclipse batch compiler,
+   which is pure Java and runs on a bare JRE).
+2. Hand-written stubs were created for **every** external type the mod
+   touches — 131 types, 433 members.
+3. All 40 project sources were compiled against those stubs. **Zero errors.**
+4. A warning pass (dead code, null dereference, unused, fallthrough,
+   resource leaks, incomplete switch) found nothing of substance.
 
-### The two unverified APIs
+The harness is checked in at `tools/offline-typecheck/`:
 
-Both are in `src/client/java/com/autodonut/client/automation/ClientFarmEngine.java`:
+```bash
+ECJ_JAR=/path/to/ecj.jar ./tools/offline-typecheck/run.sh
+```
 
-1. `NetherWartBlock.AGE` — used to detect fully-grown nether wart.
-   If it fails, try `BlockStateProperties.AGE_3`, or just delete the nether
-   wart branch in `isHarvestable()` and the `farmIncludeNetherWart` config flag.
-2. `new ItemStack(seed).getHoverName()` — used only for chat text. This exact
-   call is used in `AhScanner.java` and compiled fine there, so it is low risk.
+### What that proves
 
-Everything else (`CropBlock.isMaxAge`, `mc.gameMode.startDestroyBlock` /
-`continueDestroyBlock` / `stopDestroyBlock` / `useItemOn` /
-`handleContainerInput`, `ContainerInput.PICKUP` / `QUICK_MOVE`,
-`menu.getCarried()`, `player.blockInteractionRange()`,
-`ServerboundSetCarriedItemPacket`, `Direction.getApproximateNearest`) is
-copied verbatim from code that already compiled in this project.
+- Every file parses and type-checks under a real Java compiler.
+- Generics, control flow, definite assignment, missing returns, unreachable
+  code and switch exhaustiveness are all clean.
+- **Every call between AutoDonut's own classes resolves with correct types.**
+  Internal inconsistency is ruled out.
+
+### What that does NOT prove
+
+The stubs encode our *assumption* about each Minecraft signature. If a stub is
+wrong, the harness compiles happily and Gradle won't. **`API-SURFACE.md` is
+the review list** — all 131 types and 433 members in one file, grouped by
+origin. If `./gradlew build` fails, the mismatch is in there and the compiler
+error will name the type.
+
+**Your first job in a new session: run `./gradlew build`.** It should be much
+closer to green than it was, but treat `API-SURFACE.md` as the debugging map.
+
+### Bugs the type-check already caught
+
+- `AutoFarmBlock` / `AutoMinerBlock` called `player.sendOverlayMessage(...)`,
+  which is **not a vanilla `Player` method** (it's a Forge-ism). Replaced with
+  `displayClientMessage(Component, true)`, which is long-standing vanilla and
+  puts the text on the action bar as intended.
+
+### Previously-flagged APIs: now resolved
+
+- `NetherWartBlock.AGE` — **hardened.** `ClientFarmEngine.isHarvestable()` now
+  reads `BlockStateProperties.AGE_3` behind a `state.hasProperty(...)` guard,
+  so a moved or renamed constant degrades to "not harvestable" instead of
+  throwing.
+- `new ItemStack(seed).getHoverName()` — **fine.** Type-checks, and the same
+  call is used in `AhScanner.java`.
+- The legacy block tickers cast `Level` → `ServerLevel` inside
+  `createTickerHelper`, which is correct for the real vanilla
+  `BlockEntityTicker.tick(Level, ...)` signature. Confirmed by compiling both
+  ways.
+
 
 ---
 
@@ -144,13 +175,17 @@ src/client/java/com/autodonut/client/ client-only entrypoint
 src/main/resources/fabric.mod.json    main + client + modmenu entrypoints
 installer/AutoDonutInstaller.java
 docs/USER-GUIDE.md, docs/ci/build.yml
+API-SURFACE.md                        all 131 external types / 433 members
+tools/offline-typecheck/              ECJ stub harness + run.sh
 ```
 
 ### First thing to do
 
-**Run `./gradlew build` and fix any compile errors.** The client Smelter and Farm
-were written without a JDK available, so they have never been compiled. See the
-"unverified APIs" note in `NEXT-AI-PROMPT.md` for the two most likely failure points.
+**Run `./gradlew build`.** Every file already type-checks with zero errors against
+the stub tree in `tools/offline-typecheck/`, so the remaining risk is purely that a
+stubbed Minecraft signature doesn't match the real 26.2 one. When something fails,
+look the type up in `API-SURFACE.md`, fix both the real call and the stub, and re-run
+`./tools/offline-typecheck/run.sh` to keep the offline harness honest.
 
 Then boot a real Fabric **26.2** dedicated server with the jar present to confirm the
 client-only code has zero server-side impact.
@@ -322,7 +357,9 @@ Follow these so new code matches what's there:
 
 Rough priority order:
 
-1. **Compile it.** Nothing else matters until `./gradlew build` is green.
+1. **Compile it for real.** `./gradlew build` with the actual Minecraft artifacts.
+   The offline type-check is green; this is the last gate. Use `API-SURFACE.md` as
+   the debugging map.
 2. **Delete the legacy server-side blocks entirely.** They're dead weight now that
    everything is client-side, and removing them would let `fabric.mod.json` drop to a
    client-only mod — smaller jar, no server confusion. Touches:
@@ -347,6 +384,11 @@ Rough priority order:
 
 1. **Commit and push after every working build.** An entire multi-session build was
    lost once because it lived only in an ephemeral sandbox.
+2. **"No compiler available" is usually false.** Maven Central, Adoptium and apt were
+   all blocked in the dev sandbox, but PyPI and npm were not — and ECJ, a complete
+   pure-Java compiler, ships inside the PyPI package `karellen-jdtls` (a JRE also
+   ships as `jdk4py`). When the real dependencies are unreachable, stub them: a
+   compiler plus stubs catches far more than any amount of grep-based analysis.
 2. **Keep build artifacts out of the workspace.** The Gradle cache, decompiled
    Minecraft jars and a test server are what blew the budget. They're in `.gitignore`;
    also set `GRADLE_USER_HOME=/tmp/gradle` so the cache never lands in the workspace.

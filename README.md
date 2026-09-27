@@ -38,6 +38,7 @@
 - [Installation Guide](#-installation-guide)
 - [Command Reference](#-command-reference)
 - [Building from Source](#-building-from-source)
+- [Verification](#-verification)
 - [Architecture & Design Principles](#-architecture--design-principles)
 - [License](#-license)
 
@@ -300,6 +301,29 @@ cd AutoDonut
 ```
 
 ---
+
+## 🔍 Verification
+
+| Check | Status |
+|---|---|
+| Type-check of all 40 sources | ✅ **zero errors** |
+| Installer compile (plain JDK) | ✅ passes |
+| Warning pass (dead code, null deref, unused, fallthrough, leaks) | ✅ clean |
+| `./gradlew build` against the real game | ⏳ not yet run |
+
+The type-check is performed against hand-written stubs of the Minecraft and
+Fabric APIs, because the development machine could not reach Maven Central.
+That proves every line of AutoDonut's own code is internally consistent and
+correctly typed; it does not prove every external signature is spelled right
+for 26.2. **[`API-SURFACE.md`](API-SURFACE.md)** lists all 131 external types
+and 433 members so that assumption is reviewable rather than hidden, and the
+harness is checked in at [`tools/offline-typecheck/`](tools/offline-typecheck/).
+
+```bash
+ECJ_JAR=/path/to/ecj.jar ./tools/offline-typecheck/run.sh
+```
+
+`./gradlew build` remains the authoritative build.
 
 ## 🏛️ Architecture & Design Principles
 

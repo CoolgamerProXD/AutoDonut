@@ -1,21 +1,18 @@
 # AutoDonut
 
-Automation blocks + an optional AI advisor + a 100%-client-side Auto Miner
-and Chat Modifiers, built as a real Fabric mod for **Minecraft Java 26.2**.
-Made for a self-hosted server you own and run for you and your friends — it
-is **not** a client-side macro/cheat, and it is **not affiliated with
-DonutSMP**. Do not use it to bypass another server's rules.
+A **100% client-side** automation mod for **Minecraft Java 26.2**, built on
+Fabric. Auto Miner, Auto Smelter, Auto Farm, an economy/chest-sell helper,
+chat filters, safety tools and an optional AI advisor.
 
-It's a normal "tech mod" in the same spirit as things like Mekanism or
-Applied Energistics: it adds real, visible in-world machines that everyone
-on the server can see, that need to be built and fed items — it just
-removes the manual babysitting for smelting/farming/mining.
+**Your server installs nothing.** It can stay completely vanilla. Every
+feature works by performing the same actions you could perform by hand -
+walking, looking at a block, breaking it, clicking a slot in a GUI - just
+without you having to sit there doing it.
 
-**Server can't run mods (old hardware, shared host, etc.)?** You don't need
-the automation blocks at all — the **Auto Miner** and **Chat Modifiers**
-features (see below) are 100% client-side and work on any vanilla server,
-no server install required at all. Only the Smelter/Farm/Miner *blocks*
-need the mod on the server too.
+Made for a self-hosted server you own and run for you and your friends. It
+is **not affiliated with DonutSMP**, and it does not bypass anti-cheat,
+extend your reach, fake packets or see through walls. Don't use it to break
+another server's rules.
 
 ## What's inside
 
@@ -28,81 +25,38 @@ need the mod on the server too.
 
 ## Requirements
 
-- Minecraft Java Edition **26.2**
-- **Fabric Loader** on your client always. On the **server** too, but only
-  if you want the Auto Smelter/Farm/Miner *blocks* — if you just want the
-  client-side Auto Miner and/or Chat Modifiers, your server can stay
-  completely vanilla/unmodded (click "Get Fabric Loader" in the installer,
-  or go to https://fabricmc.net/use/)
-- Java 21+ (Java 25 recommended) to run the server/game itself
-- (Optional) [Mod Menu](https://modrinth.com/mod/modmenu) if you want a
-  "Mods" button/GUI for AutoDonut's settings — not required, everything
-  also works from a keybind and chat commands without it.
+| | |
+|---|---|
+| **Minecraft** | Java Edition **26.2** |
+| **Fabric Loader** | On your client. Get it at https://fabricmc.net/use/ (the installer has a button for it) |
+| **Fabric API** | Bundled with the installer |
+| **Java** | 21 or newer (25 recommended) |
+| **Server** | **Nothing at all.** Your server stays completely vanilla. |
+| **Mod Menu** | Optional. Only adds a settings button to the Mods screen - the `K` keybind and the chat commands work without it. |
 
 ## Installing
 
-**Easiest way:** double-click `AutoDonut-Installer.jar` (double-click works
-because a JVM is already required to play Minecraft, so `.jar` files are
-already set up to launch that way on most systems — if double-click doesn't
-work on yours, run `java -jar AutoDonut-Installer.jar` from a terminal).
+**Easiest way:** double-click `AutoDonut-Installer.jar`. Double-click works
+because you already have a JVM installed to play Minecraft. If your system
+doesn't associate `.jar` files, run `java -jar AutoDonut-Installer.jar`.
 
 In the installer:
-1. Pick **client** (your `.minecraft` folder) or **server** (your server's
-   root folder — same one that has `server.properties` in it).
-2. Optionally paste an AI API key (OpenAI or any OpenAI-compatible
-   endpoint/proxy). You can leave this blank and set it later in-game.
-3. Click **Install AutoDonut**. Repeat once per computer (you + each friend
-   who plays need this on their client; the server only needs it once).
+1. Pick **client** - your `.minecraft` folder. This is all you need.
+2. Optionally paste an AI API key (OpenAI, or any OpenAI-compatible
+   endpoint). Leave it blank and set it later in-game if you prefer.
+3. Click **Install AutoDonut**. Do this once per computer - you and each
+   friend who wants it. Nothing is installed on the server.
 
-**Manual way:** just copy both jars from the `mods/` folder here into the
-`mods` folder of your client or server.
+There is also a **server** option in the installer. You only need it for the
+legacy blocks described near the bottom of this guide, and you almost
+certainly don't.
 
-## The blocks
+**Manual way:** copy both jars from the `mods/` folder into the `mods`
+folder inside `.minecraft`.
 
-Get one of each anytime with `/autodonut kit` (needs permission level 2,
-i.e. an op/admin).
-
-- **Auto Smelter** — feed raw items into it (right-click with an item in
-  hand, or hopper it in) and it instantly smelts anything with a vanilla
-  smelting recipe into its output side — no fuel needed, no waiting.
-  Right-click empty-handed to grab a finished stack.
-- **Auto Farm** — place it in the middle of a crop field (same height as
-  the crops). Every second it harvests any fully-grown wheat / carrots /
-  potatoes / beetroot in a radius around itself and instantly replants
-  them, storing the produce inside. **Sneak + right-click** to cycle the
-  radius (2/4/6/8). Right-click empty-handed to collect.
-- **Auto Miner** — a fuel-powered quarry. Feed it coal/charcoal/a coal
-  block (right-click with it in hand), and it digs a square shaft straight
-  down beneath itself, storing everything it mines (skips bedrock and
-  liquids). **Sneak + right-click** to cycle the dig width (1x1/3x3/5x5).
-  Right-click empty-handed to collect.
-
-All three are also compatible with hoppers for automatic item transport,
-just like a furnace or chest.
-
-## Commands
-
-Run `/autodonut status` to see current settings. Everything below needs
-op/admin permission:
-
-```
-/autodonut automate <true|false>          Master switch for all automation
-/autodonut machine smelter <true|false>   Toggle just the Auto Smelter
-/autodonut machine farm <true|false>      Toggle just the Auto Farm
-/autodonut machine miner <true|false>     Toggle just the Auto Miner
-/autodonut kit                            Get one of each block
-
-/autodonut ai setkey <key>                Save your AI API key
-/autodonut ai baseurl <url>               Change the AI endpoint (default: OpenAI)
-/autodonut ai model <name>                Change the AI model (default: gpt-4o-mini)
-/autodonut ai ask <question>              Ask the AI advisor anything in chat
-/autodonut ai auto <true|false>           Toggle the AI "auto controller" flag
-```
-
-The AI advisor (`/autodonut ai ask`) sends your question straight to
-whichever API endpoint you configured (OpenAI by default) using your key —
-nothing goes anywhere else. Your key is stored locally in
-`config/autodonut.json`.
+**First run:** launch the game, join your server, and press **K** to open
+AutoDonut Settings. Everything is off by default - nothing starts running
+until you switch it on.
 
 ## Chat Modifiers (100% client-side)
 
@@ -144,7 +98,102 @@ Three extra checkboxes live in the GUI (no chat command yet, GUI only):
   instead, whenever a message contains your name, AutoDonut echoes an extra
   yellow `>> you were mentioned above <<` line right after it.
 
-## Auto Miner (100% client-side, no server install needed)
+## Auto Smelter (100% client-side)
+
+Tends **ordinary vanilla furnaces** that you have already placed and lit -
+Furnace, Blast Furnace and Smoker. There is no AutoDonut block involved and
+nothing is installed on the server.
+
+Every few seconds it looks for a furnace within reach, and if it finds one:
+
+1. Opens it, exactly as if you had right-clicked it.
+2. Takes any finished item out of the output slot.
+3. Tops the fuel slot up from your inventory.
+4. Puts more raw material into the input slot.
+5. Closes it again.
+
+You keep your normal fuel economy - this does **not** smelt for free. It
+just saves you standing there shuffling stacks.
+
+**Settings** (`K` > Auto Smelter, or `/autodonutsmelt`)
+
+| Setting | Default | What it does |
+|---|---|---|
+| Enabled | off | Master switch |
+| Interval | 5s | How often to service a furnace |
+| Radius | 4 | Blocks to search, clamped to your real reach |
+| Take output | on | Pull finished items out |
+| Insert fuel | on | Refill the fuel slot |
+| Insert input | on | Refill the input slot |
+| Fuel list | coal, charcoal, coal block, blaze rod, dried kelp block | What counts as fuel |
+| Input list | 17 common ores/foods | **Allow-list.** Only these get fed in |
+
+The input list is an explicit allow-list on purpose. AutoDonut will never
+feed a furnace something just because it *could* be smelted, so it can't
+quietly cook your diamond gear or a stack of something you were saving.
+
+```
+/autodonutsmelt                      Show current settings
+/autodonutsmelt on|off               Turn it on or off
+/autodonutsmelt interval <1-60>      Seconds between visits
+/autodonutsmelt radius <1-6>         Search radius
+/autodonutsmelt fuel add <item>      Add to the fuel list
+/autodonutsmelt fuel remove <item>   Remove from the fuel list
+/autodonutsmelt input add <item>     Add to the input allow-list
+/autodonutsmelt input remove <item>  Remove from the input allow-list
+/autodonutsmelt stats                Items smelted this session
+/autodonutsmelt stats reset          Reset the counters
+```
+
+## Auto Farm (100% client-side)
+
+Harvests **fully-grown vanilla crops** around you and replants them from
+seeds in your hotbar. Again: no AutoDonut block, nothing on the server -
+it's the same break-and-place a player does, performed for you.
+
+Handles wheat, carrots, potatoes, beetroot and nether wart. It only ever
+touches crops that are **fully grown**, so it won't trample a field you're
+still waiting on.
+
+If you run out of a seed it keeps harvesting, tells you once in chat, and
+stops replanting that crop rather than leaving holes silently.
+
+**Settings** (`K` > Auto Farm, or `/autodonutfarm`)
+
+| Setting | Default | What it does |
+|---|---|---|
+| Enabled | off | Master switch |
+| Radius | 4 | Blocks around you, clamped to your real reach |
+| Replant | on | Put a seed back after harvesting |
+| Include nether wart | on | Also farm soul-sand wart |
+| Speed | 4 ticks | Ticks between actions - lower is faster |
+
+```
+/autodonutfarm                   Show current settings
+/autodonutfarm on|off            Turn it on or off
+/autodonutfarm radius <1-6>      Harvest radius
+/autodonutfarm replant <bool>    Replant after harvesting
+/autodonutfarm netherwart <bool> Include nether wart
+/autodonutfarm speed <1-20>      Ticks between actions
+/autodonutfarm stats             Crops harvested this session
+/autodonutfarm stats reset       Reset the counters
+```
+
+### How these two stay honest
+
+Both engines are deliberately boring about what they're allowed to do:
+
+- **Radius is clamped to `player.blockInteractionRange()`** - your real,
+  server-checked reach. Asking for radius 6 when you can reach 4.5 gets you
+  4.5. There is no reach extension anywhere in AutoDonut.
+- **One action per tick.** No burst clicking.
+- **They yield.** If you open a GUI yourself, or the Auto Miner is running,
+  they stand down until you're done.
+- **Every interaction is one a player can perform** - the same
+  `useItemOn` / `startDestroyBlock` / container-click calls the vanilla
+  client makes when your hand does it.
+
+## Auto Miner (100% client-side)
 
 This one doesn't touch the server at all — it just automates YOUR OWN
 player's mining, using exactly the actions a real person could do by hand:
@@ -382,15 +431,85 @@ jump) — it never fakes an inventory-screen click with no screen open.
   is actively moving you, presses jump once — enough to reset most servers'
   AFK-kick timers without actually playing for you.
 
+## Optional: the legacy server-side blocks
+
+> **You almost certainly don't want these.** Everything they do is now done
+> client-side by the Auto Smelter and Auto Farm above, with nothing installed
+> on the server. They're kept only for people who *do* run a modded server and
+> prefer real in-world machines that everyone can see.
+>
+> **This is the one part of AutoDonut that needs the mod installed on the
+> server as well as on every client that should see the blocks.**
+
+Get one of each anytime with `/autodonut kit` (needs permission level 2,
+i.e. an op/admin).
+
+- **Auto Smelter** — feed raw items into it (right-click with an item in
+  hand, or hopper it in) and it instantly smelts anything with a vanilla
+  smelting recipe into its output side — no fuel needed, no waiting.
+  Right-click empty-handed to grab a finished stack.
+- **Auto Farm** — place it in the middle of a crop field (same height as
+  the crops). Every second it harvests any fully-grown wheat / carrots /
+  potatoes / beetroot in a radius around itself and instantly replants
+  them, storing the produce inside. **Sneak + right-click** to cycle the
+  radius (2/4/6/8). Right-click empty-handed to collect.
+- **Auto Miner** — a fuel-powered quarry. Feed it coal/charcoal/a coal
+  block (right-click with it in hand), and it digs a square shaft straight
+  down beneath itself, storing everything it mines (skips bedrock and
+  liquids). **Sneak + right-click** to cycle the dig width (1x1/3x3/5x5).
+  Right-click empty-handed to collect.
+
+All three are also compatible with hoppers for automatic item transport,
+just like a furnace or chest.
+
+## AI advisor and legacy server commands
+
+> These run **on the server**, so they only exist if you installed AutoDonut
+> server-side for the legacy blocks above. The client-side commands -
+> `/autodonutmine`, `/autodonutsmelt`, `/autodonutfarm`, `/autodonuteconomy`,
+> `/autodonutchat` and `/autodonutmenu` - always work, and so does the `K`
+> settings screen.
+
+Run `/autodonut status` to see current settings. Everything below needs
+op/admin permission:
+
+```
+/autodonut automate <true|false>          Master switch for all automation
+/autodonut machine smelter <true|false>   Toggle just the Auto Smelter
+/autodonut machine farm <true|false>      Toggle just the Auto Farm
+/autodonut machine miner <true|false>     Toggle just the Auto Miner
+/autodonut kit                            Get one of each block
+
+/autodonut ai setkey <key>                Save your AI API key
+/autodonut ai baseurl <url>               Change the AI endpoint (default: OpenAI)
+/autodonut ai model <name>                Change the AI model (default: gpt-4o-mini)
+/autodonut ai ask <question>              Ask the AI advisor anything in chat
+/autodonut ai auto <true|false>           Toggle the AI "auto controller" flag
+```
+
+The AI advisor (`/autodonut ai ask`) sends your question straight to
+whichever API endpoint you configured (OpenAI by default) using your key —
+nothing goes anywhere else. Your key is stored locally in
+`config/autodonut.json`.
+
 ## Notes on how this was built (for the curious / skeptical)
 
-This isn't a mockup — it's real Java compiled against the actual Minecraft
-26.2 game code, and it was test-booted on a real Fabric dedicated server
-during development, including with the client-only code included (it loads
-the 43-mod stack and reaches `Done` on startup with zero errors — proving
-the client-only features genuinely add nothing to what the server needs).
-The full source is in `autodonut-mod-source.zip` if you want to check it,
-extend it, or rebuild it with `./gradlew build` (needs JDK 25).
+This is real Java written against the actual Minecraft 26.2 / Fabric API, not
+a mockup. The whole of `src/` type-checks with zero errors, and the installer
+compiles against a plain JDK.
+
+Being straight with you about what that does and doesn't mean: at the time of
+writing the build has been verified with a **type-check against hand-written
+stubs** of the Minecraft API (see `tools/offline-typecheck/`), because the
+machine it was developed on couldn't reach Maven Central to download the real
+Minecraft artifacts. That proves every line of AutoDonut's own code is
+internally consistent and correctly typed. It does **not** prove that every
+Minecraft signature it calls is spelled exactly right for 26.2 -
+`API-SURFACE.md` lists all 433 external members so that assumption is
+reviewable rather than hidden.
+
+The authoritative check is `./gradlew build` (needs JDK 21+), which downloads
+the real game and compiles against it. Run it before you trust a jar.
 
 ## Fair warning
 
