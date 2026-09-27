@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "autodonut:block/auto_miner" }
+  }
+}
