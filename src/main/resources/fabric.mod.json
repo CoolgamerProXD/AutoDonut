@@ -5,9 +5,13 @@
 	"name": "AutoDonut",
 	"description": "Automation blocks (smelting, farming, quarry-mining) plus optional AI advisor for your own self-hosted survival server. Not affiliated with DonutSMP; intended for servers you own/administrate.",
 	"authors": [
-		"You"
+		"CoolgamerProXD"
 	],
-	"contact": {},
+	"contact": {
+		"homepage": "https://github.com/CoolgamerProXD/AutoDonut",
+		"sources": "https://github.com/CoolgamerProXD/AutoDonut",
+		"issues": "https://github.com/CoolgamerProXD/AutoDonut/issues"
+	},
 	"license": "CC0-1.0",
 	"icon": "assets/autodonut/icon.png",
 	"environment": "*",
