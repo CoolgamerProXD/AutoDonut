@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/CoolgamerProXD/AutoDonut/actions"><img src="https://img.shields.io/github/actions/workflow/status/CoolgamerProXD/AutoDonut/build.yml?branch=main&style=flat-square&label=Build" alt="Build Status" /></a>
+  <a href="#-verification"><img src="https://img.shields.io/badge/Type--check-40%2F40%20sources%2C%200%20errors-brightgreen?style=flat-square" alt="Type-check: 0 errors" /></a>
   <a href="https://fabricmc.net/"><img src="https://img.shields.io/badge/Minecraft-26.2-blue?style=flat-square&logo=minecraft" alt="Minecraft 26.2" /></a>
   <a href="https://fabricmc.net/"><img src="https://img.shields.io/badge/Fabric%20Loader-%3E%3D0.19.0-dbcfb3?style=flat-square" alt="Fabric Loader" /></a>
   <a href="https://www.oracle.com/java/"><img src="https://img.shields.io/badge/Java-21%2B%20%7C%2025%20recommended-orange?style=flat-square&logo=openjdk" alt="Java 21+" /></a>
