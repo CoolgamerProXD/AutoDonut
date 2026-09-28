@@ -115,6 +115,8 @@ public class AutoDonutClient implements ClientModInitializer {
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> registerSmelterCommands(dispatcher));
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> registerFarmCommands(dispatcher));
 
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> registerAiCommands(dispatcher));
+
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
 				dispatcher.register(ClientCommands.literal("autodonutmenu").executes(ctx -> {
 					AutoDonutConfigScreen.open();
@@ -142,6 +144,101 @@ public class AutoDonutClient implements ClientModInitializer {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * The optional AI advisor, as a client command.
+	 *
+	 * <p>This used to be a server command. It is client-side now like everything
+	 * else: the request goes straight from your machine to whichever endpoint you
+	 * configured, and the answer is printed only to you. Your API key never leaves
+	 * {@code config/autodonut.json}.
+	 */
+	private static void registerAiCommands(com.mojang.brigadier.CommandDispatcher<net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource> dispatcher) {
+		dispatcher.register(ClientCommands.literal("autodonut")
+
+				.then(ClientCommands.literal("ai")
+
+						.then(ClientCommands.literal("setkey")
+								.then(ClientCommands.argument("key", com.mojang.brigadier.arguments.StringArgumentType.greedyString()).executes(ctx -> {
+									String key = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "key");
+									AutoDonutConfig cfg = AutoDonutConfig.get();
+									cfg.aiApiKey = key;
+									AutoDonutConfig.save();
+									ctx.getSource().sendFeedback(Component.literal(
+											"[AutoDonut AI] Key saved (" + key.length() + " chars). Stored locally in "
+													+ "config/autodonut.json and only ever sent to " + cfg.aiBaseUrl + "."));
+									return 1;
+								})))
+
+						.then(ClientCommands.literal("forgetkey").executes(ctx -> {
+							AutoDonutConfig.get().aiApiKey = "";
+							AutoDonutConfig.save();
+							ctx.getSource().sendFeedback(Component.literal("[AutoDonut AI] Key deleted from config."));
+							return 1;
+						}))
+
+						.then(ClientCommands.literal("model")
+								.then(ClientCommands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.string()).executes(ctx -> {
+									AutoDonutConfig.get().aiModel = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name");
+									AutoDonutConfig.save();
+									ctx.getSource().sendFeedback(Component.literal("[AutoDonut AI] Model set to " + AutoDonutConfig.get().aiModel));
+									return 1;
+								})))
+
+						.then(ClientCommands.literal("baseurl")
+								.then(ClientCommands.argument("url", com.mojang.brigadier.arguments.StringArgumentType.string()).executes(ctx -> {
+									AutoDonutConfig.get().aiBaseUrl = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "url");
+									AutoDonutConfig.save();
+									ctx.getSource().sendFeedback(Component.literal("[AutoDonut AI] Endpoint set to " + AutoDonutConfig.get().aiBaseUrl));
+									return 1;
+								})))
+
+						.then(ClientCommands.literal("ask")
+								.then(ClientCommands.argument("question", com.mojang.brigadier.arguments.StringArgumentType.greedyString()).executes(ctx -> {
+									AutoDonutConfig cfg = AutoDonutConfig.get();
+									if (cfg.aiApiKey == null || cfg.aiApiKey.isBlank()) {
+										ctx.getSource().sendError(Component.literal(
+												"[AutoDonut AI] No API key set. Use /autodonut ai setkey <key> first."));
+										return 0;
+									}
+									String question = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "question");
+									Minecraft mc = Minecraft.getInstance();
+									ctx.getSource().sendFeedback(Component.literal("[AutoDonut AI] Thinking..."));
+									com.autodonut.ai.AiClient.ask(
+											"You are AutoDonut's in-game assistant for a private, self-hosted Minecraft "
+													+ "survival server with mining, farming, smelting and a player economy. "
+													+ "Give short, practical, in-character tips. Keep replies under 4 sentences.",
+											question
+									).thenAccept(answer -> mc.execute(() -> {
+										if (mc.player != null) {
+											mc.player.sendSystemMessage(Component.literal("[AutoDonut AI] " + answer));
+										}
+									}));
+									return 1;
+								}))))
+
+				.then(ClientCommands.literal("status").executes(ctx -> {
+					AutoDonutConfig cfg = AutoDonutConfig.get();
+					ctx.getSource().sendFeedback(Component.literal(String.format(
+							"[AutoDonut] client-side status%n"
+									+ "  Auto Miner:   %s%n"
+									+ "  Auto Smelter: %s%n"
+									+ "  Auto Farm:    %s%n"
+									+ "  Safety:       auto-eat %s, threat-pause %s, anti-AFK %s%n"
+									+ "  AI advisor:   %s",
+							onOff(cfg.clientMinerEnabled), onOff(cfg.clientSmelterEnabled), onOff(cfg.clientFarmEnabled),
+							onOff(cfg.safetyAutoEatEnabled), onOff(cfg.safetyThreatPauseEnabled), onOff(cfg.safetyAntiAfkEnabled),
+							(cfg.aiApiKey != null && !cfg.aiApiKey.isBlank()) ? "key set" : "no key")));
+					return 1;
+				}))
+
+				.executes(ctx -> {
+					ctx.getSource().sendFeedback(Component.literal(
+							"[AutoDonut] /autodonut status | /autodonut ai setkey|forgetkey|model|baseurl|ask"
+									+ " - or press K for the settings screen."));
+					return 1;
+				}));
 	}
 
 	private static void registerCommands(com.mojang.brigadier.CommandDispatcher<net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource> dispatcher) {

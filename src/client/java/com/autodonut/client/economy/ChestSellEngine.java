@@ -260,20 +260,20 @@ public final class ChestSellEngine {
     }
 
     /** [startInclusive, endExclusive) of menu slot indices that are safe/sensible to offer for sale. */
-    private static int[] sourceSlotRange(AbstractContainerMenu menu) {
-        if (menu instanceof InventoryMenu) {
+    private static int[] sourceSlotRange(AbstractContainerMenu containerMenu) {
+        if (containerMenu instanceof InventoryMenu) {
             // Player's own inventory: main inv (9-35) + hotbar (36-44). Skips crafting/result/armor/offhand.
             return new int[] { 9, 45 };
         }
-        int containerCount = Math.max(0, menu.slots.size() - 36);
+        int containerCount = Math.max(0, containerMenu.slots.size() - 36);
         return new int[] { 0, containerCount };
     }
 
-    private static int hotbarMenuIndex(AbstractContainerMenu menu, int hotbarSlot) {
-        if (menu instanceof InventoryMenu) {
+    private static int hotbarMenuIndex(AbstractContainerMenu containerMenu, int hotbarSlot) {
+        if (containerMenu instanceof InventoryMenu) {
             return 36 + hotbarSlot;
         }
-        int containerCount = Math.max(0, menu.slots.size() - 36);
+        int containerCount = Math.max(0, containerMenu.slots.size() - 36);
         return containerCount + 27 + hotbarSlot;
     }
 

@@ -56,8 +56,8 @@ public class AutoDonutConfigScreen extends Screen {
 				this.minecraft.gui.setScreen(new AutoDonutSafetyScreen(this)))
 				.bounds(cx - 130, top + 125, 260, 20).build());
 
-		this.addRenderableWidget(Button.builder(Component.literal("AI Advisor & legacy server blocks"), b ->
-				this.minecraft.gui.setScreen(new AutoDonutAutomationScreen(this)))
+		this.addRenderableWidget(Button.builder(Component.literal("AI Advisor (optional)"), b ->
+				this.minecraft.gui.setScreen(new AutoDonutAiScreen(this)))
 				.bounds(cx - 130, top + 150, 260, 20).build());
 
 		MultiLineTextWidget note = new MultiLineTextWidget(cx - 140, top + 178, Component.literal(

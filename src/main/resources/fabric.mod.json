@@ -3,7 +3,7 @@
 	"id": "autodonut",
 	"version": "${version}",
 	"name": "AutoDonut",
-	"description": "Automation blocks (smelting, farming, quarry-mining) plus optional AI advisor for your own self-hosted survival server. Not affiliated with DonutSMP; intended for servers you own/administrate.",
+	"description": "A 100% client-side automation mod: Auto Miner, Auto Smelter, Auto Farm, economy/chest-sell helpers, chat filters, safety tools and an optional AI advisor. Installs on your client only - your server stays completely vanilla. Not affiliated with DonutSMP; intended for servers you own or administrate.",
 	"authors": [
 		"CoolgamerProXD"
 	],
@@ -14,11 +14,8 @@
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/autodonut/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
-		"main": [
-			"com.autodonut.AutoDonut"
-		],
 		"client": [
 			"com.autodonut.client.AutoDonutClient"
 		],

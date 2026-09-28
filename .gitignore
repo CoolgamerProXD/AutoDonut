@@ -5,9 +5,9 @@ out/
 *.log
 
 # Loom-generated run directories
-run/
+/run/
 runs/
-server/
+/server/
 
 # Installer compile & staging artifacts
 installer/classes/

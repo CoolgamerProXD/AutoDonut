@@ -11,6 +11,10 @@ import java.util.concurrent.Executors;
 /** Optional: posts a plain text alert to a Discord webhook URL you configure. Fully optional, off unless a URL is set. */
 public final class DiscordWebhook {
 
+    // One shared client for the lifetime of the game process. Deliberately never
+    // closed: closing it would tear down the executor that in-flight alerts are
+    // still using, and the JVM reclaims it on exit anyway.
+    @SuppressWarnings("resource")
     private static final HttpClient CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
             .executor(Executors.newVirtualThreadPerTaskExecutor())

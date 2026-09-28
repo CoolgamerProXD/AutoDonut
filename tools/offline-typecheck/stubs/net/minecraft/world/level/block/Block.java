@@ -6,5 +6,4 @@ public class Block extends net.minecraft.world.level.block.state.BlockBehaviour 
   public String getDescriptionId() { return ""; }
   public static void popResource(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.item.ItemStack stack) { }
   protected static <B extends Block> com.mojang.serialization.MapCodec<B> simpleCodec(java.util.function.Function<Properties, B> f) { return null; }
-  public static java.util.List<net.minecraft.world.item.ItemStack> getDrops(net.minecraft.world.level.block.state.BlockState state, net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.entity.BlockEntity be) { return java.util.List.of(); }
 }

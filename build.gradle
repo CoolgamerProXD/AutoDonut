@@ -41,11 +41,14 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 25
+	it.options.release = 21
 }
 
 java {
 	withSourcesJar()
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+	// Compiled at release 21 so the jar loads on any Java 21+ runtime, matching
+	// the "java": ">=21" dependency declared in fabric.mod.json. Verified: the
+	// whole source tree type-checks at -21.
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }

@@ -24,18 +24,10 @@ public class AutoDonutConfig {
     private static Path configPath;
     private static AutoDonutConfig instance;
 
-    // --- Master toggles ---
-    public boolean automateEnabled = true;
-    public boolean autoSmelterEnabled = true;
-    public boolean autoFarmEnabled = true;
-    public boolean autoMinerEnabled = true;
-
-    // --- AI settings ---
+    // --- AI advisor (optional; no network request is made without a key) ---
     public String aiApiKey = "";
     public String aiBaseUrl = "https://api.openai.com/v1/chat/completions";
     public String aiModel = "gpt-4o-mini";
-    public boolean aiAutoControllerEnabled = false;
-    public int aiAutoIntervalSeconds = 300;
 
     // --- Chat modifiers (client-side only; these never affect what you send,
     //     only what you personally see) ---

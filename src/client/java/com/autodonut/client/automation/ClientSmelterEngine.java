@@ -230,8 +230,8 @@ public final class ClientSmelterEngine {
 		return false;
 	}
 
-	private static boolean isFurnaceBlock(BlockState state) {
-		net.minecraft.world.level.block.Block block = state.getBlock();
+	private static boolean isFurnaceBlock(BlockState blockState) {
+		net.minecraft.world.level.block.Block block = blockState.getBlock();
 		return block == Blocks.FURNACE || block == Blocks.BLAST_FURNACE || block == Blocks.SMOKER;
 	}
 
