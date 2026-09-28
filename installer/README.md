@@ -5,8 +5,8 @@ A lightweight, zero-dependency Java Swing GUI installer for **AutoDonut**.
 ## Features
 
 - Automatic detection of standard `.minecraft` directory on Windows, macOS, and Linux
-- Single-click mod + Fabric API installation into client `mods/` folder
-- Optional server-side installation mode (points to server directory)
+- Single-click mod + Fabric API installation into your client `mods/` folder
+- **Client only.** There is deliberately no server option: AutoDonut never needs to be installed on a server
 - API key configuration UI for the AI advisor feature
 - One-click button to download/open the official Fabric Loader installer
 

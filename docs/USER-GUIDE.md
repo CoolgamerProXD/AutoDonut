@@ -18,7 +18,7 @@ another server's rules.
 
 | File | What it's for |
 |---|---|
-| `AutoDonut-Installer.jar` | **Double-click this.** A small installer app that copies the mod into your `.minecraft` folder (client) or your server folder, and lets you set your AI key. |
+| `AutoDonut-Installer.jar` | **Double-click this.** A small installer app that copies the mod into your `.minecraft` folder and lets you set your AI key. |
 | `mods/autodonut-1.0.0.jar` | The mod itself, if you'd rather drag-and-drop it manually. |
 | `mods/fabric-api-0.161.0+26.2.jar` | Required dependency (Fabric API). |
 | `autodonut-mod-source.zip` | Full Java source + Gradle project, in case you want to tweak or rebuild it yourself. |
@@ -41,15 +41,11 @@ because you already have a JVM installed to play Minecraft. If your system
 doesn't associate `.jar` files, run `java -jar AutoDonut-Installer.jar`.
 
 In the installer:
-1. Pick **client** - your `.minecraft` folder. This is all you need.
+1. Confirm your `.minecraft` folder (the installer finds it for you).
 2. Optionally paste an AI API key (OpenAI, or any OpenAI-compatible
    endpoint). Leave it blank and set it later in-game if you prefer.
 3. Click **Install AutoDonut**. Do this once per computer - you and each
-   friend who wants it. Nothing is installed on the server.
-
-There is also a **server** option in the installer. You only need it for the
-legacy blocks described near the bottom of this guide, and you almost
-certainly don't.
+   friend who wants it. Nothing is installed on the server, ever.
 
 **Manual way:** copy both jars from the `mods/` folder into the `mods`
 folder inside `.minecraft`.
@@ -60,7 +56,7 @@ until you switch it on.
 
 ## Chat Modifiers (100% client-side)
 
-Unlike the automation blocks, this part only affects what **you personally
+This only affects what **you personally
 see** in chat. It doesn't need to be on the server, doesn't touch what you
 send, and doesn't need op/admin permission — anyone can use it on any
 server. Controlled with `/autodonutchat` or **AutoDonut Settings > Chat
@@ -279,7 +275,7 @@ just adds automation on top of it, it doesn't fight it or need it.
   deferred render-state design that doesn't have a simple "draw a string"
   hook, so a chat summary was the more reliable option for now.
 
-## Economy & Chest Sell (100% client-side, no server install needed)
+## Economy & Chest Sell (100% client-side)
 
 Built around a typical player-driven auction house command (`/ah`). It's a
 small overlay panel that appears on top of GUIs you already have open — it
@@ -431,66 +427,25 @@ jump) — it never fakes an inventory-screen click with no screen open.
   is actively moving you, presses jump once — enough to reset most servers'
   AFK-kick timers without actually playing for you.
 
-## Optional: the legacy server-side blocks
+## AI Advisor (optional, off unless you set a key)
 
-> **You almost certainly don't want these.** Everything they do is now done
-> client-side by the Auto Smelter and Auto Farm above, with nothing installed
-> on the server. They're kept only for people who *do* run a modded server and
-> prefer real in-world machines that everyone can see.
->
-> **This is the one part of AutoDonut that needs the mod installed on the
-> server as well as on every client that should see the blocks.**
-
-Get one of each anytime with `/autodonut kit` (needs permission level 2,
-i.e. an op/admin).
-
-- **Auto Smelter** — feed raw items into it (right-click with an item in
-  hand, or hopper it in) and it instantly smelts anything with a vanilla
-  smelting recipe into its output side — no fuel needed, no waiting.
-  Right-click empty-handed to grab a finished stack.
-- **Auto Farm** — place it in the middle of a crop field (same height as
-  the crops). Every second it harvests any fully-grown wheat / carrots /
-  potatoes / beetroot in a radius around itself and instantly replants
-  them, storing the produce inside. **Sneak + right-click** to cycle the
-  radius (2/4/6/8). Right-click empty-handed to collect.
-- **Auto Miner** — a fuel-powered quarry. Feed it coal/charcoal/a coal
-  block (right-click with it in hand), and it digs a square shaft straight
-  down beneath itself, storing everything it mines (skips bedrock and
-  liquids). **Sneak + right-click** to cycle the dig width (1x1/3x3/5x5).
-  Right-click empty-handed to collect.
-
-All three are also compatible with hoppers for automatic item transport,
-just like a furnace or chest.
-
-## AI advisor and legacy server commands
-
-> These run **on the server**, so they only exist if you installed AutoDonut
-> server-side for the legacy blocks above. The client-side commands -
-> `/autodonutmine`, `/autodonutsmelt`, `/autodonutfarm`, `/autodonuteconomy`,
-> `/autodonutchat` and `/autodonutmenu` - always work, and so does the `K`
-> settings screen.
-
-Run `/autodonut status` to see current settings. Everything below needs
-op/admin permission:
+A small in-game assistant. With no API key configured AutoDonut makes **no
+network requests at all**. When you do set one, your question goes straight
+from your machine to whichever OpenAI-compatible endpoint you configured, and
+the answer is printed only to you. The key is stored locally in
+`config/autodonut.json` and is never sent anywhere else.
 
 ```
-/autodonut automate <true|false>          Master switch for all automation
-/autodonut machine smelter <true|false>   Toggle just the Auto Smelter
-/autodonut machine farm <true|false>      Toggle just the Auto Farm
-/autodonut machine miner <true|false>     Toggle just the Auto Miner
-/autodonut kit                            Get one of each block
-
-/autodonut ai setkey <key>                Save your AI API key
-/autodonut ai baseurl <url>               Change the AI endpoint (default: OpenAI)
-/autodonut ai model <name>                Change the AI model (default: gpt-4o-mini)
-/autodonut ai ask <question>              Ask the AI advisor anything in chat
-/autodonut ai auto <true|false>           Toggle the AI "auto controller" flag
+/autodonut status                  Show what's currently switched on
+/autodonut ai setkey <key>         Save your API key
+/autodonut ai forgetkey            Delete the stored key
+/autodonut ai baseurl <url>        Change the endpoint (default: OpenAI)
+/autodonut ai model <name>         Change the model (default: gpt-4o-mini)
+/autodonut ai ask <question>       Ask a question in chat
 ```
 
-The AI advisor (`/autodonut ai ask`) sends your question straight to
-whichever API endpoint you configured (OpenAI by default) using your key —
-nothing goes anywhere else. Your key is stored locally in
-`config/autodonut.json`.
+The endpoint and model are also editable in `K` > **AI Advisor**, which shows
+whether a key is set and has a **Forget my API key** button.
 
 ## Notes on how this was built (for the curious / skeptical)
 
@@ -505,7 +460,7 @@ machine it was developed on couldn't reach Maven Central to download the real
 Minecraft artifacts. That proves every line of AutoDonut's own code is
 internally consistent and correctly typed. It does **not** prove that every
 Minecraft signature it calls is spelled exactly right for 26.2 -
-`API-SURFACE.md` lists all 433 external members so that assumption is
+`API-SURFACE.md` lists all 387 external members so that assumption is
 reviewable rather than hidden.
 
 The authoritative check is `./gradlew build` (needs JDK 21+), which downloads

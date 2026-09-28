@@ -2,24 +2,29 @@
 
 Every Minecraft, Fabric and library member AutoDonut depends on, in one place.
 
-**131 external types, 433 members.**
+**106 external types, 387 members.**
 
 ## Why this file exists
 
-AutoDonut has been fully type-checked (see `tools/offline-typecheck/`), but that
+AutoDonut is fully type-checked (see `tools/offline-typecheck/`), but that
 check compiles against *stubs* of the APIs below. The stubs are our best
-understanding of the Minecraft 26.2 / Fabric signatures - they are not the real
-thing. So this file is the review checklist: if `./gradlew build` fails, the
-mismatch is somewhere in this list, and the error message will name the type.
+understanding of the Minecraft 26.2 / Fabric signatures - they are not the
+real thing. So this is the review checklist: if `./gradlew build` fails, the
+mismatch is somewhere in this list and the compiler error will name the type.
 
-Everything here is a **read-only dependency** - AutoDonut calls these, it does
-not patch, mixin or otherwise modify them. (`mixins` is empty in
-`fabric.mod.json`.)
+Everything here is a **read-only dependency**. AutoDonut calls these; it does
+not patch, mixin or otherwise modify them - `mixins` is empty in
+`fabric.mod.json`. Nothing in this list is a server-side API: the mod declares
+`"environment": "client"` and has no `main` entrypoint.
+
+The list is kept minimal automatically. Any stub that can be deleted while the
+project still compiles is deleted, so every entry below is genuinely reached
+by AutoDonut's code.
 
 
 ## Minecraft
 
-*92 types, 349 members*
+*73 types, 315 members*
 
 
 ### `net.minecraft.ChatFormatting`
@@ -95,7 +100,6 @@ public void visible(boolean v)
 ### `net.minecraft.client.gui.components.Button`
 
 ```java
-@FunctionalInterface public interface OnPress
 public static Builder builder(Component message, OnPress onPress)
 public Builder bounds(int x, int y, int w, int h)
 public Builder pos(int x, int y)
@@ -108,7 +112,6 @@ public Button build()
 ### `net.minecraft.client.gui.components.Checkbox`
 
 ```java
-@FunctionalInterface public interface OnValueChange
 public boolean selected()
 public static Builder builder(Component message, net.minecraft.client.gui.Font font)
 public Builder pos(int x, int y)
@@ -219,27 +222,6 @@ public ClientInput input
 *(type reference only - no members used)*
 
 
-### `net.minecraft.commands.CommandSourceStack`
-
-```java
-public boolean hasPermission(int level)
-public void sendSuccess(java.util.function.Supplier<net.minecraft.network.chat.Component> msg, boolean broadcast)
-public void sendFailure(net.minecraft.network.chat.Component msg)
-public net.minecraft.server.level.ServerPlayer getPlayerOrException() throws Exception
-public net.minecraft.server.level.ServerLevel getLevel()
-public net.minecraft.server.level.ServerPlayer getPlayer()
-public void sendSystemMessage(net.minecraft.network.chat.Component msg)
-```
-
-### `net.minecraft.commands.Commands`
-
-```java
-public static LiteralArgumentBuilder<CommandSourceStack> literal(String name)
-public static <T> RequiredArgumentBuilder<CommandSourceStack, T> argument(String name, ArgumentType<T> type)
-public static final int LEVEL_ALL = 0, LEVEL_MODERATORS = 1, LEVEL_GAMEMASTERS = 2, LEVEL_ADMINS = 3, LEVEL_OWNERS = 4
-public static java.util.function.Predicate<CommandSourceStack> hasPermission(int level)
-```
-
 ### `net.minecraft.core.BlockPos`
 
 ```java
@@ -317,14 +299,6 @@ public static final net.minecraft.core.Registry<net.minecraft.world.level.block.
 public static final net.minecraft.core.Registry<net.minecraft.world.level.block.entity.BlockEntityType<?>> BLOCK_ENTITY_TYPE = null
 ```
 
-### `net.minecraft.core.registries.Registries`
-
-```java
-public static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.level.block.Block>> BLOCK = null
-public static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.item.Item>> ITEM = null
-public static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.level.block.entity.BlockEntityType<?>>> BLOCK_ENTITY_TYPE = null
-```
-
 ### `net.minecraft.network.chat.Component`
 
 ```java
@@ -371,16 +345,6 @@ public static <T> ResourceKey<T> create(ResourceKey<net.minecraft.core.Registry<
 public Identifier location()
 ```
 
-### `net.minecraft.server.level.ServerLevel`
-
-*(type reference only - no members used)*
-
-
-### `net.minecraft.server.level.ServerPlayer`
-
-*(type reference only - no members used)*
-
-
 ### `net.minecraft.world.Container`
 
 ```java
@@ -389,26 +353,12 @@ default void clearContent()
 default boolean canPlaceItem(int slot, ItemStack stack)
 ```
 
-### `net.minecraft.world.ContainerHelper`
-
-```java
-public static ItemStack removeItem(java.util.List<ItemStack> list, int index, int amount)
-public static ItemStack takeItem(java.util.List<ItemStack> list, int index)
-public static void saveAllItems(net.minecraft.world.level.storage.ValueOutput out, NonNullList<ItemStack> items)
-public static void loadAllItems(net.minecraft.world.level.storage.ValueInput in, NonNullList<ItemStack> items)
-```
-
 ### `net.minecraft.world.InteractionHand`
 
 *(type reference only - no members used)*
 
 
 ### `net.minecraft.world.InteractionResult`
-
-*(type reference only - no members used)*
-
-
-### `net.minecraft.world.WorldlyContainer`
 
 *(type reference only - no members used)*
 
@@ -513,13 +463,6 @@ public net.minecraft.world.Container container
 public int getContainerSlot()
 ```
 
-### `net.minecraft.world.item.BlockItem`
-
-```java
-public BlockItem(net.minecraft.world.level.block.Block block, Item.Properties props)
-public net.minecraft.world.level.block.Block getBlock()
-```
-
 ### `net.minecraft.world.item.Item`
 
 ```java
@@ -570,50 +513,6 @@ public static final Item AIR=null, COAL=null, CHARCOAL=null, COAL_BLOCK=null, BL
 *(type reference only - no members used)*
 
 
-### `net.minecraft.world.item.crafting.BlastingRecipe`
-
-```java
-public net.minecraft.world.item.ItemStack assemble(SingleRecipeInput input, Object registries)
-```
-
-### `net.minecraft.world.item.crafting.Recipe`
-
-*(type reference only - no members used)*
-
-
-### `net.minecraft.world.item.crafting.RecipeHolder`
-
-*(type reference only - no members used)*
-
-
-### `net.minecraft.world.item.crafting.RecipeInput`
-
-*(type reference only - no members used)*
-
-
-### `net.minecraft.world.item.crafting.RecipeManager`
-
-```java
-public static <I extends RecipeInput, T extends Recipe<I>> CachedCheck<I, T> createCheck(RecipeType<T> type)
-```
-
-### `net.minecraft.world.item.crafting.RecipeType`
-
-*(type reference only - no members used)*
-
-
-### `net.minecraft.world.item.crafting.SingleRecipeInput`
-
-*(type reference only - no members used)*
-
-
-### `net.minecraft.world.item.crafting.SmeltingRecipe`
-
-```java
-public net.minecraft.world.item.ItemStack assemble(SingleRecipeInput input, Object registries)
-public net.minecraft.world.item.ItemStack assemble(SingleRecipeInput input)
-```
-
 ### `net.minecraft.world.level.ItemLike`
 
 *(type reference only - no members used)*
@@ -639,18 +538,6 @@ public java.util.List<net.minecraft.world.entity.Entity> getEntities(net.minecra
 public boolean removeBlock(net.minecraft.core.BlockPos pos, boolean isMoving)
 ```
 
-### `net.minecraft.world.level.block.BaseEntityBlock`
-
-```java
-protected BaseEntityBlock(Properties props)
-protected abstract com.mojang.serialization.MapCodec<? extends BaseEntityBlock> codec()
-public abstract BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
-protected net.minecraft.world.level.block.RenderShape getRenderShape(BlockState state)
-protected net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, net.minecraft.world.entity.player.Player player, net.minecraft.world.phys.BlockHitResult hit)
-protected static <T extends BlockEntity, E extends BlockEntity> BlockEntityTicker<T> createTickerHelper(BlockEntityType<T> a, BlockEntityType<E> b, BlockEntityTicker<? super E> t)
-```
-
 ### `net.minecraft.world.level.block.Block`
 
 ```java
@@ -660,7 +547,6 @@ public net.minecraft.world.item.Item asItem()
 public String getDescriptionId()
 public static void popResource(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.item.ItemStack stack)
 protected static <B extends Block> com.mojang.serialization.MapCodec<B> simpleCodec(java.util.function.Function<Properties, B> f)
-public static java.util.List<net.minecraft.world.item.ItemStack> getDrops(net.minecraft.world.level.block.state.BlockState state, net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.entity.BlockEntity be)
 ```
 
 ### `net.minecraft.world.level.block.Blocks`
@@ -687,11 +573,6 @@ public NetherWartBlock(Properties p)
 public static final net.minecraft.world.level.block.state.properties.IntegerProperty AGE = null
 ```
 
-### `net.minecraft.world.level.block.RenderShape`
-
-*(type reference only - no members used)*
-
-
 ### `net.minecraft.world.level.block.SoundType`
 
 *(type reference only - no members used)*
@@ -710,11 +591,6 @@ public void setChanged()
 protected void loadAdditional(net.minecraft.world.level.storage.ValueInput in)
 protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput out)
 ```
-
-### `net.minecraft.world.level.block.entity.BlockEntityTicker`
-
-*(type reference only - no members used)*
-
 
 ### `net.minecraft.world.level.block.entity.BlockEntityType`
 
@@ -833,15 +709,10 @@ public double length()
 
 ## Fabric API / Loader
 
-*14 types, 19 members*
+*11 types, 12 members*
 
 
 ### `net.fabricmc.api.ClientModInitializer`
-
-*(type reference only - no members used)*
-
-
-### `net.fabricmc.api.ModInitializer`
 
 *(type reference only - no members used)*
 
@@ -868,8 +739,6 @@ public static <T> RequiredArgumentBuilder<FabricClientCommandSource, T> argument
 ```java
 public static final Event<EndTick> END_CLIENT_TICK = null
 public static final Event<StartTick> START_CLIENT_TICK = null
-@FunctionalInterface public interface EndTick
-@FunctionalInterface public interface StartTick
 ```
 
 ### `net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper`
@@ -884,7 +753,6 @@ public static KeyMapping registerKeyMapping(KeyMapping mapping)
 public static final Event<AllowGame> ALLOW_GAME = null
 public static final Event<AllowChat> ALLOW_CHAT = null
 public static final Event<Chat> CHAT = null
-@FunctionalInterface public interface AllowGame
 ```
 
 ### `net.fabricmc.fabric.api.client.screen.v1.ScreenEvents`
@@ -892,8 +760,6 @@ public static final Event<Chat> CHAT = null
 ```java
 public static final Event<AfterInit> AFTER_INIT = null
 public static final Event<BeforeInit> BEFORE_INIT = null
-@FunctionalInterface public interface AfterInit
-@FunctionalInterface public interface BeforeInit
 ```
 
 ### `net.fabricmc.fabric.api.client.screen.v1.Screens`
@@ -902,22 +768,10 @@ public static final Event<BeforeInit> BEFORE_INIT = null
 public static java.util.List<AbstractWidget> getWidgets(Screen screen)
 ```
 
-### `net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback`
-
-*(type reference only - no members used)*
-
-
 ### `net.fabricmc.fabric.api.event.Event`
 
 *(type reference only - no members used)*
 
-
-### `net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder`
-
-```java
-public static <T extends BlockEntity> FabricBlockEntityTypeBuilder<T> create(Factory<T> factory, net.minecraft.world.level.block.Block... blocks)
-public BlockEntityType<T> build()
-```
 
 ### `net.fabricmc.loader.api.FabricLoader`
 
@@ -927,14 +781,13 @@ static FabricLoader getInstance()
 
 ## Brigadier (commands)
 
-*11 types, 21 members*
+*11 types, 17 members*
 
 
 ### `com.mojang.brigadier.Command`
 
-```java
-@FunctionalInterface public interface Command<S>
-```
+*(type reference only - no members used)*
+
 
 ### `com.mojang.brigadier.CommandDispatcher`
 
@@ -983,11 +836,8 @@ public static String getString(com.mojang.brigadier.context.CommandContext<?> c,
 
 ### `com.mojang.brigadier.builder.ArgumentBuilder`
 
-```java
-@SuppressWarnings("unchecked") public B then(ArgumentBuilder<S, ?> a)
-@SuppressWarnings("unchecked") public B executes(com.mojang.brigadier.Command<S> c)
-@SuppressWarnings("unchecked") public B requires(java.util.function.Predicate<S> p)
-```
+*(type reference only - no members used)*
+
 
 ### `com.mojang.brigadier.builder.LiteralArgumentBuilder`
 
@@ -1008,7 +858,7 @@ public <T> T getArgument(String name, Class<T> clazz)
 
 ## Mojang libraries
 
-*3 types, 3 members*
+*2 types, 3 members*
 
 
 ### `com.mojang.blaze3d.platform.InputConstants`
@@ -1019,11 +869,6 @@ public static final Key UNKNOWN = new Key()
 public static class Key
 ```
 
-### `com.mojang.serialization.Codec`
-
-*(type reference only - no members used)*
-
-
 ### `com.mojang.serialization.MapCodec`
 
 *(type reference only - no members used)*
@@ -1031,14 +876,13 @@ public static class Key
 
 ## Mod Menu (optional)
 
-*2 types, 2 members*
+*2 types, 1 members*
 
 
 ### `com.terraformersmc.modmenu.api.ConfigScreenFactory`
 
-```java
-@FunctionalInterface public interface ConfigScreenFactory<S extends Screen>
-```
+*(type reference only - no members used)*
+
 
 ### `com.terraformersmc.modmenu.api.ModMenuApi`
 
@@ -1048,7 +892,7 @@ default ConfigScreenFactory<?> getModConfigScreenFactory()
 
 ## Third-party libraries
 
-*9 types, 39 members*
+*7 types, 39 members*
 
 
 ### `com.google.gson.Gson`
@@ -1124,13 +968,3 @@ protected TypeToken()
 public java.lang.reflect.Type getType()
 public static <T> TypeToken<T> get(Class<T> c)
 ```
-
-### `org.slf4j.Logger`
-
-*(type reference only - no members used)*
-
-
-### `org.slf4j.LoggerFactory`
-
-*(type reference only - no members used)*
-

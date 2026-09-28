@@ -9,15 +9,16 @@ import java.nio.charset.StandardCharsets;
 /**
  * AutoDonut Installer
  * A tiny double-clickable desktop app that drops the AutoDonut Fabric mod
- * (+ Fabric API) into a Minecraft client or server's mods folder, and writes
- * out config/autodonut.json with whatever AI settings you enter here.
+ * (+ Fabric API) into your Minecraft client's mods folder, and writes out
+ * config/autodonut.json with whatever AI settings you enter here.
+ *
+ * AutoDonut is client-only - there is deliberately no server option, because
+ * nothing ever needs to be installed on a server.
  *
  * Run with: java -jar AutoDonut-Installer.jar
  */
 public class AutoDonutInstaller extends JFrame {
 
-    private final JRadioButton clientRadio = new JRadioButton("Minecraft client (singleplayer / join a server)");
-    private final JRadioButton serverRadio = new JRadioButton("A server folder I run myself");
     private final JTextField pathField = new JTextField();
     private final JTextField apiKeyField = new JTextField();
     private final JTextField baseUrlField = new JTextField("https://api.openai.com/v1/chat/completions");
@@ -33,24 +34,19 @@ public class AutoDonutInstaller extends JFrame {
         main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
         main.setBorder(new EmptyBorder(14, 14, 14, 14));
 
-        JLabel title = new JLabel("AutoDonut \u2014 automation blocks + AI advisor for your own server");
+        JLabel title = new JLabel("AutoDonut \u2014 client-side automation for Minecraft 26.2");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 15f));
         main.add(title);
         main.add(Box.createVerticalStrut(4));
-        JLabel subtitle = new JLabel("For a self-hosted / your-own Minecraft server. Not affiliated with DonutSMP.");
+        JLabel subtitle = new JLabel("Installs on your computer only \u2014 your server stays completely vanilla. Not affiliated with DonutSMP.");
         subtitle.setFont(subtitle.getFont().deriveFont(Font.ITALIC, 11f));
         main.add(subtitle);
         main.add(Box.createVerticalStrut(12));
 
-        main.add(section("1. Where should this install?"));
-        ButtonGroup group = new ButtonGroup();
-        group.add(clientRadio);
-        group.add(serverRadio);
-        clientRadio.setSelected(true);
-        clientRadio.addActionListener(e -> pathField.setText(defaultClientPath()));
-        serverRadio.addActionListener(e -> pathField.setText(""));
-        main.add(clientRadio);
-        main.add(serverRadio);
+        main.add(section("1. Your Minecraft folder"));
+        JLabel hint = new JLabel("This should be your .minecraft folder. Nothing is installed on any server.");
+        hint.setFont(hint.getFont().deriveFont(Font.ITALIC, 11f));
+        main.add(hint);
         main.add(Box.createVerticalStrut(6));
 
         JPanel pathPanel = new JPanel(new BorderLayout(6, 0));
@@ -89,7 +85,7 @@ public class AutoDonutInstaller extends JFrame {
         statusArea.setLineWrap(true);
         statusArea.setWrapStyleWord(true);
         statusArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        log("Ready. Fill in the folder above (your .minecraft folder, or your server's root folder), then click Install.");
+        log("Ready. Check the folder above points at your .minecraft, then click Install.");
         JScrollPane scroll = new JScrollPane(statusArea);
         main.add(scroll);
 
@@ -173,16 +169,13 @@ public class AutoDonutInstaller extends JFrame {
             String baseUrl = baseUrlField.getText().trim().replace("\"", "\\\"");
             String model = modelField.getText().trim().replace("\"", "\\\"");
 
+            // Only the AI keys are seeded here. Every automation feature ships
+            // off by default and the mod fills in the rest of the config itself
+            // on first launch, so we must not guess at those defaults.
             String json = "{\n" +
-                    "  \"automateEnabled\": true,\n" +
-                    "  \"autoSmelterEnabled\": true,\n" +
-                    "  \"autoFarmEnabled\": true,\n" +
-                    "  \"autoMinerEnabled\": true,\n" +
                     "  \"aiApiKey\": \"" + apiKey + "\",\n" +
                     "  \"aiBaseUrl\": \"" + (baseUrl.isEmpty() ? "https://api.openai.com/v1/chat/completions" : baseUrl) + "\",\n" +
-                    "  \"aiModel\": \"" + (model.isEmpty() ? "gpt-4o-mini" : model) + "\",\n" +
-                    "  \"aiAutoControllerEnabled\": false,\n" +
-                    "  \"aiAutoIntervalSeconds\": 300\n" +
+                    "  \"aiModel\": \"" + (model.isEmpty() ? "gpt-4o-mini" : model) + "\"\n" +
                     "}\n";
             Files.write(configDir.resolve("autodonut.json"), json.getBytes(StandardCharsets.UTF_8));
 
@@ -192,13 +185,9 @@ public class AutoDonutInstaller extends JFrame {
             log("");
             log("Next steps:");
             log("1) Make sure this folder is running Fabric Loader for Minecraft 26.2 (click 'Get Fabric Loader' above if needed).");
-            if (clientRadio.isSelected()) {
-                log("2) Launch Minecraft using the Fabric profile.");
-            } else {
-                log("2) Start your server using its fabric-server-launcher.jar as usual.");
-            }
-            log("3) In-game: place the Auto Smelter / Auto Farm / Auto Miner blocks (use '/autodonut kit' to get one of each).");
-            log("4) Check settings anytime with '/autodonut status', or set your AI key later with '/autodonut ai setkey <key>'.");
+            log("2) Launch Minecraft using the Fabric profile and join your server as normal.");
+            log("3) In-game: press K to open AutoDonut Settings. Everything is off by default.");
+            log("4) Check what's active anytime with '/autodonut status', or set your AI key later with '/autodonut ai setkey <key>'.");
             JOptionPane.showMessageDialog(this, "AutoDonut installed successfully!", "Done", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             log("ERROR: " + e.getMessage());

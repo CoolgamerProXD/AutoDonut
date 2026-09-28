@@ -24,14 +24,16 @@ agent session. Everything it needs is in this file.
 | Client-side Safety | ✅ Done |
 | Client-side Chat Modifiers | ✅ Done |
 | AI advisor | ✅ Done |
-| Server-side blocks | ⚠️ Still present, now **legacy/optional** |
-| Type-check | ✅ **Zero errors** across all 40 files (against API stubs — see [Build status](#build-status)) |
+| Server-side blocks | ✅ **Deleted.** The mod is client-only by construction |
+| Type-check | ✅ **Zero errors** across all 28 files (against API stubs — see [Build status](#build-status)) |
 | Real `./gradlew build` | ❌ Still never run — Maven Central unreachable in the dev sandbox |
 
-**The headline:** every feature now has a 100% client-side implementation.
-Nothing needs to be installed on the server. The old server-side blocks are
-still in the codebase but are marked LEGACY in the UI and can be deleted
-entirely if you want (see [Ideas / backlog](#ideas--backlog)).
+**The headline:** AutoDonut is a client-only mod. `fabric.mod.json` declares
+`"environment": "client"` with no `main` entrypoint, and there is no
+`src/main/java` — every class lives in the client source set. Fabric will not
+load it on a server even if the jar is dropped in. The old server-side blocks,
+their registries, resources and the server `/autodonut` command have all been
+deleted; the AI advisor survived as the client command `/autodonut ai`.
 
 ---
 
@@ -49,15 +51,15 @@ Minecraft artifacts could not be downloaded. Instead:
 1. A real Java compiler was obtained (ECJ 3.46, the Eclipse batch compiler,
    which is pure Java and runs on a bare JRE).
 2. Hand-written stubs were created for **every** external type the mod
-   touches — 131 types, 433 members.
-3. All 40 project sources were compiled against those stubs. **Zero errors.**
+   touches — 106 types, 387 members.
+3. All 28 project sources were compiled against those stubs. **Zero errors.**
 4. A warning pass (dead code, null dereference, unused, fallthrough,
    resource leaks, incomplete switch) found nothing of substance.
 
 The harness is checked in at `tools/offline-typecheck/`:
 
 ```bash
-ECJ_JAR=/path/to/ecj.jar ./tools/offline-typecheck/run.sh
+./tools/offline-typecheck/run.sh     # bootstraps a JRE + ECJ from PyPI if needed
 ```
 
 ### What that proves
@@ -72,7 +74,7 @@ ECJ_JAR=/path/to/ecj.jar ./tools/offline-typecheck/run.sh
 
 The stubs encode our *assumption* about each Minecraft signature. If a stub is
 wrong, the harness compiles happily and Gradle won't. **`API-SURFACE.md` is
-the review list** — all 131 types and 433 members in one file, grouped by
+the review list** — all 106 types and 387 members in one file, grouped by
 origin. If `./gradlew build` fails, the mismatch is in there and the compiler
 error will name the type.
 
@@ -94,10 +96,8 @@ closer to green than it was, but treat `API-SURFACE.md` as the debugging map.
   throwing.
 - `new ItemStack(seed).getHoverName()` — **fine.** Type-checks, and the same
   call is used in `AhScanner.java`.
-- The legacy block tickers cast `Level` → `ServerLevel` inside
-  `createTickerHelper`, which is correct for the real vanilla
-  `BlockEntityTicker.tick(Level, ...)` signature. Confirmed by compiling both
-  ways.
+- The block-ticker signature question is moot: the server-side blocks that
+  raised it have since been deleted.
 
 
 ---
@@ -151,27 +151,26 @@ All 100% client-side, all working through the settings GUI (keybind `K`,
   filters system broadcasts), hide join/leave, mention highlighting.
 - **AI advisor** — `/autodonut ai ask` against any OpenAI-compatible endpoint.
 
-There are also **legacy server-side blocks** (`src/main/java/.../block/`) left over
-from before the client-only requirement. They're marked LEGACY in the UI. They are
-optional dead weight — see the backlog.
+There is **no server-side code at all**. `fabric.mod.json` declares
+`"environment": "client"` with no `main` entrypoint, and `src/main/java` does not
+exist. Keep it that way — adding a `main` entrypoint would break the mod's single
+most important promise.
 
 ### Repo layout
 
 ```
 build.gradle, gradle.properties, settings.gradle, gradlew
-src/main/java/com/autodonut/          common + LEGACY server blocks
+src/main/java/                        DOES NOT EXIST - the mod is client-only
+src/client/java/com/autodonut/
   config/AutoDonutConfig.java         single Gson config, config/autodonut.json
-  ai/AiClient.java
-  command/AutoDonutCommand.java       /autodonut (server-side)
-  block/, block/entity/, registry/    LEGACY
-src/client/java/com/autodonut/client/ client-only entrypoint
-  AutoDonutClient.java                keybinds, tick loop, all client commands
+  ai/AiClient.java                    optional AI advisor HTTP client
+  client/AutoDonutClient.java         keybinds, tick loop, ALL commands
   automation/ClientSmelterEngine.java
   automation/ClientFarmEngine.java
   miner/AutoMinerEngine.java, OreType.java
   economy/  (10 classes)
   safety/SafetyEngine.java, DiscordWebhook.java
-  gui/      (8 screens; AutoDonutConfigScreen is the hub)
+  client/gui/ (8 screens; AutoDonutConfigScreen is the hub)
 src/main/resources/fabric.mod.json    main + client + modmenu entrypoints
 installer/AutoDonutInstaller.java
 docs/USER-GUIDE.md, docs/ci/build.yml
@@ -212,7 +211,7 @@ model will guess.
 - Runtime needs Java 21+, 25 recommended.
 - `loom { splitEnvironmentSourceSets() }` gives the `src/client` source set.
 
-### Registration (LEGACY blocks only)
+### Registration (kept for reference — the mod registers no blocks or items now)
 - `Identifier.fromNamespaceAndPath(ns, path)` — class is
   `net.minecraft.resources.Identifier`, **not** `ResourceLocation`.
 - `BlockBehaviour.Properties.of().setId(resourceKey)` — `setId` is **mandatory**.
@@ -360,12 +359,7 @@ Rough priority order:
 1. **Compile it for real.** `./gradlew build` with the actual Minecraft artifacts.
    The offline type-check is green; this is the last gate. Use `API-SURFACE.md` as
    the debugging map.
-2. **Delete the legacy server-side blocks entirely.** They're dead weight now that
-   everything is client-side, and removing them would let `fabric.mod.json` drop to a
-   client-only mod — smaller jar, no server confusion. Touches:
-   `block/`, `block/entity/`, `registry/`, `command/AutoDonutCommand.java`,
-   `AutoDonut.java`, the blockstate/model/texture resources, and
-   `AutoDonutAutomationScreen`. Keep `AiClient` (move it client-side).
+2. ~~Delete the legacy server-side blocks.~~ **Done.**
 3. **Auto Smelter: multi-furnace support.** Currently services the single nearest
    furnace. A furnace *array* is the normal way people smelt in bulk.
 4. **Auto Farm: sugar cane, bamboo, melons/pumpkins.** Different growth mechanics

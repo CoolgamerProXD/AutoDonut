@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="#-verification"><img src="https://img.shields.io/badge/Type--check-40%2F40%20sources%2C%200%20errors-brightgreen?style=flat-square" alt="Type-check: 0 errors" /></a>
+  <a href="#-verification"><img src="https://img.shields.io/badge/Type--check-28%2F28%20sources%2C%200%20errors-brightgreen?style=flat-square" alt="Type-check: 0 errors" /></a>
   <a href="https://fabricmc.net/"><img src="https://img.shields.io/badge/Minecraft-26.2-blue?style=flat-square&logo=minecraft" alt="Minecraft 26.2" /></a>
   <a href="https://fabricmc.net/"><img src="https://img.shields.io/badge/Fabric%20Loader-%3E%3D0.19.0-dbcfb3?style=flat-square" alt="Fabric Loader" /></a>
   <a href="https://www.oracle.com/java/"><img src="https://img.shields.io/badge/Java-21%2B%20%7C%2025%20recommended-orange?style=flat-square&logo=openjdk" alt="Java 21+" /></a>
@@ -185,21 +185,17 @@ Press **`K`** in-game to open the settings hub, then enable whichever modules yo
 <details>
 <summary><strong>Click to expand full command table</strong></summary>
 
-### 🔧 AI Advisor & Legacy Server Commands
+### 🔧 Status & AI Advisor
 
-> These require the mod to also be installed **on the server**, which you almost certainly don't want. The `ai` subcommands are the only ones most people need.
+> Client-side, like everything else. The AI advisor is entirely opt-in: with no key configured, AutoDonut makes no network requests at all.
 
 ```bash
-/autodonut status                         # Show current mod configuration
-/autodonut automate <true|false>          # LEGACY: server-block master toggle
-/autodonut machine smelter <true|false>   # LEGACY: toggle Auto Smelter block
-/autodonut machine farm <true|false>      # LEGACY: toggle Auto Farm block
-/autodonut machine miner <true|false>     # LEGACY: toggle Auto Miner quarry block
-/autodonut kit                            # LEGACY: receive one of each block
-/autodonut ai setkey <key>                # Configure AI advisor API key
-/autodonut ai baseurl <url>               # Configure AI API endpoint URL
-/autodonut ai model <name>                # Set AI model (default: gpt-4o-mini)
-/autodonut ai ask <question>              # Query the AI survival advisor in chat
+/autodonut status                         # Show which modules are currently active
+/autodonut ai setkey <key>                # Save your API key (stored locally only)
+/autodonut ai forgetkey                   # Delete the stored key
+/autodonut ai baseurl <url>               # Configure the API endpoint URL
+/autodonut ai model <name>                # Set the model (default: gpt-4o-mini)
+/autodonut ai ask <question>              # Ask the advisor a question in chat
 ```
 
 ### ⛏️ Client Miner Commands
@@ -306,7 +302,7 @@ cd AutoDonut
 
 | Check | Status |
 |---|---|
-| Type-check of all 40 sources | ✅ **zero errors** |
+| Type-check of all 28 sources | ✅ **zero errors** |
 | Installer compile (plain JDK) | ✅ passes |
 | Warning pass (dead code, null deref, unused, fallthrough, leaks) | ✅ clean |
 | `./gradlew build` against the real game | ⏳ not yet run |
@@ -315,8 +311,8 @@ The type-check is performed against hand-written stubs of the Minecraft and
 Fabric APIs, because the development machine could not reach Maven Central.
 That proves every line of AutoDonut's own code is internally consistent and
 correctly typed; it does not prove every external signature is spelled right
-for 26.2. **[`API-SURFACE.md`](API-SURFACE.md)** lists all 131 external types
-and 433 members so that assumption is reviewable rather than hidden, and the
+for 26.2. **[`API-SURFACE.md`](API-SURFACE.md)** lists all 106 external types
+and 387 members so that assumption is reviewable rather than hidden, and the
 harness is checked in at [`tools/offline-typecheck/`](tools/offline-typecheck/).
 
 ```bash
@@ -329,7 +325,8 @@ ECJ_JAR=/path/to/ecj.jar ./tools/offline-typecheck/run.sh
 
 1. **Strict Client-Side Legitimacy:** Client-side automations (Auto Miner, Quick-Sell, Auto-Eat) rely on real game client interaction routines (`MultiPlayerGameMode.useItemOn`, standard input injection, and client tick events). They deliberately avoid illegal instant packet injection or impossible inventory actions with closed screens.
 2. **Modular Configuration:** All modules are independently toggleable via `config/autodonut.json` or the Mod Menu GUI.
-3. **Zero Hard Dependencies on Server:** Client modules degrade gracefully and operate in 100% unmodded vanilla multiplayer environments.
+3. **Client-only by construction, not by promise:** `fabric.mod.json` declares `"environment": "client"` and has no `main` entrypoint, and there is no `src/main/java` at all — every line of the mod lives in the client source set. Fabric will not load AutoDonut on a server even if someone drops the jar in.
+4. **No mixins:** `"mixins": []`. AutoDonut never patches Minecraft's own code; it only calls public APIs. Every one of them is listed in [`API-SURFACE.md`](API-SURFACE.md).
 
 ---
 
