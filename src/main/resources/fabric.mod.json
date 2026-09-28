@@ -1,0 +1,33 @@
+{
+	"schemaVersion": 1,
+	"id": "autodonut",
+	"version": "${version}",
+	"name": "AutoDonut",
+	"description": "A 100% client-side automation mod: Auto Miner, Auto Smelter, Auto Farm, economy/chest-sell helpers, chat filters, safety tools and an optional AI advisor. Installs on your client only - your server stays completely vanilla. Not affiliated with DonutSMP; intended for servers you own or administrate.",
+	"authors": [
+		"CoolgamerProXD"
+	],
+	"contact": {
+		"homepage": "https://github.com/CoolgamerProXD/AutoDonut",
+		"sources": "https://github.com/CoolgamerProXD/AutoDonut",
+		"issues": "https://github.com/CoolgamerProXD/AutoDonut/issues"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/autodonut/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.autodonut.client.AutoDonutClient"
+		],
+		"modmenu": [
+			"com.autodonut.client.AutoDonutModMenuIntegration"
+		]
+	},
+	"mixins": [],
+	"depends": {
+		"fabricloader": ">=0.19.0",
+		"minecraft": ">=26.2",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
