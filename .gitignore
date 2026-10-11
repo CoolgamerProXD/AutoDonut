@@ -1,0 +1,36 @@
+# Gradle / Fabric Loom build artifacts
+.gradle/
+build/
+out/
+*.log
+
+# Loom-generated run directories
+/run/
+runs/
+/server/
+
+# Installer compile & staging artifacts
+installer/classes/
+installer/bundled/
+installer/*.jar
+
+# Distributable artifacts — published via GitHub Releases, not committed
+dist/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Java / IDE
+*.class
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
