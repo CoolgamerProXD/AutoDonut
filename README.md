@@ -147,6 +147,20 @@ Stand in your field, or walk around it, and AutoDonut keeps it harvested.
 
 ---
 
+### 🔦 Block ESP / Base Finder
+
+> Inspired by **[BaseFinder (Block ESP)](https://www.curseforge.com/minecraft/mc-mods/block-esp)** by **ShadowsIsNothing** — full credit to him. That mod is All Rights Reserved, so **no code from it is used here**; this is an independent implementation. Go give the original a download, it has a mini-map and entity detection AutoDonut doesn't. See [`CREDITS.md`](CREDITS.md).
+
+- **Highlights blocks you care about** — chests, barrels, shulkers, spawners, beacons, hoppers and ender chests by default; add any block with `/autodonutesp add <block> [#RRGGBB]`.
+- **Per-block colours**, configurable scan radius (4–128) and vertical radius.
+- **Read-only.** It looks at block data the client already has. It never interacts with anything, so it can't trip movement or interaction checks.
+- **Bounded cost.** Scans run on a timer (default every 20 ticks), skip unloaded chunks, and stop at a hit cap — a big radius costs scan time, not frame rate.
+- **`/autodonutesp list`** prints the nearest hits with coordinates, distance and a compass bearing. This works regardless of rendering, which matters — see the note below.
+
+> ⚠️ **Boxes are depth-tested**, i.e. hidden behind terrain. True see-through-walls rendering needs a custom no-depth render layer, and render APIs are the one part of Minecraft this project can't verify offline. Rather than ship a toggle that silently does nothing, the renderer is honest about it and `BlockEspRenderer` names the one-line change to make once it can be tested against the real 26.2 jar. The renderer also disables itself after a single failed frame, so if the API has moved, detection and `list` keep working.
+
+---
+
 ## 📋 Requirements
 
 | Component | Requirement |
@@ -196,6 +210,19 @@ Press **`K`** in-game to open the settings hub, then enable whichever modules yo
 /autodonut ai baseurl <url>               # Configure the API endpoint URL
 /autodonut ai model <name>                # Set the model (default: gpt-4o-mini)
 /autodonut ai ask <question>              # Ask the advisor a question in chat
+```
+
+### 🔦 Block ESP Commands
+```bash
+/autodonutesp                             # Show status
+/autodonutesp on|off                      # Toggle Block ESP
+/autodonutesp list [count]                # Nearest hits with coords + bearing
+/autodonutesp radius <4-128>              # Horizontal scan radius
+/autodonutesp height <1-128>              # Vertical scan radius
+/autodonutesp boxes <true|false>          # Toggle in-world box drawing
+/autodonutesp add <block> [#RRGGBB]       # Track a block (e.g. chest, minecraft:spawner)
+/autodonutesp remove <block>              # Stop tracking a block
+/autodonutesp clear                       # Clear the tracking list
 ```
 
 ### ⛏️ Client Miner Commands
@@ -320,6 +347,24 @@ ECJ_JAR=/path/to/ecj.jar ./tools/offline-typecheck/run.sh
 ```
 
 `./gradlew build` remains the authoritative build.
+
+### Market price importer
+
+[`tools/market-import/`](tools/market-import/) seeds your price database from
+[DonutSMP Terminal](https://www.donutsmpterminal.com) so the deal finder has
+sensible numbers on day one:
+
+```bash
+python3 tools/market-import/import_prices.py --dry-run
+python3 tools/market-import/import_prices.py --out autodonut_market.json
+```
+
+It's a standalone script, not part of the mod — AutoDonut itself still makes no
+network requests except the AI advisor. It reads and obeys `robots.txt` (which
+allows `/all_items` and disallows `/api/`), identifies itself, caches for 12 h,
+and fails loudly rather than writing an empty database. The data belongs to
+DonutSMP Terminal; none of it is committed here. Tests:
+`python3 tools/market-import/test_import.py`.
 
 ## 🏛️ Architecture & Design Principles
 

@@ -24,6 +24,8 @@ agent session. Everything it needs is in this file.
 | Client-side Safety | ✅ Done |
 | Client-side Chat Modifiers | ✅ Done |
 | AI advisor | ✅ Done |
+| Block ESP / Base Finder | ✅ Done — detection solid, box rendering unverified |
+| Market price importer | ✅ Done — `tools/market-import/`, tests pass |
 | Server-side blocks | ✅ **Deleted.** The mod is client-only by construction |
 | Type-check | ✅ **Zero errors** across all 28 files (against API stubs — see [Build status](#build-status)) |
 | Real `./gradlew build` | ❌ Still never run — Maven Central unreachable in the dev sandbox |
@@ -87,6 +89,30 @@ closer to green than it was, but treat `API-SURFACE.md` as the debugging map.
   which is **not a vanilla `Player` method** (it's a Forge-ism). Replaced with
   `displayClientMessage(Component, true)`, which is long-standing vanilla and
   puts the text on the action bar as intended.
+
+### Highest-risk surface: BlockEspRenderer
+
+`src/client/java/com/autodonut/client/esp/BlockEspRenderer.java` is the single
+most likely thing to fail against the real jar. Rendering APIs move constantly
+and the stub tree can't vouch for them. It is deliberately isolated:
+
+- `BlockEspEngine` contains **zero** rendering code, so detection, config and
+  `/autodonutesp list` survive a broken renderer.
+- The renderer catches `Throwable` (covering `LinkageError`), disables itself
+  after one bad frame, and surfaces the error in `/autodonutesp status`.
+- Only `AutoDonutClient`'s single `WorldRenderEvents.AFTER_TRANSLUCENT.register`
+  call references it.
+
+Unverified there: `WorldRenderContext.matrixStack()/consumers()/camera()`,
+`RenderType.lines()`, `MultiBufferSource.getBuffer`, and
+`ShapeRenderer.renderLineBox` (this was `LevelRenderer.renderLineBox` before
+1.21.4 — check which it is in 26.2 first).
+
+**Known gap, deliberate:** boxes are depth-tested, so they don't draw through
+walls. Fixing that needs a custom no-depth `RenderType`. Don't guess at it —
+verify against the real jar, then change the single `consumers.getBuffer(...)`
+call. A `espThroughWalls` config flag was deliberately *not* added rather than
+ship a toggle that does nothing.
 
 ### Previously-flagged APIs: now resolved
 
@@ -368,6 +394,8 @@ Rough priority order:
    then fix the default command templates and price regex.
 6. **Auto-relist** unsold AH listings — blocked on #5.
 7. **Real HUD overlay** for session stats, using 26.2's deferred HUD API.
+7b. **Block ESP through walls** — custom no-depth RenderType; verify first.
+7c. **Block ESP entity detection and a mini-map**, like the original BaseFinder.
 8. **First-run setup wizard** for the Economy regex/commands.
 9. **Publish release jars.** GitHub asset upload was failing from the sandbox
    (`uploads.github.com` unreachable); CI artifact upload works fine instead.

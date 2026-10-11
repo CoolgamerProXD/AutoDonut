@@ -391,6 +391,29 @@ All under `/autodonuteconomy` (or partially in the settings GUI):
   locally (`config/autodonut_ledger.json`); `ledger` shows your running
   total spent, earned, and net profit for the session.
 
+### Starting with real prices instead of an empty database
+
+The deal finder needs price history before it can tell you what a good price
+looks like, and that normally means walking past a lot of `/ah` listings first.
+You can skip the wait by seeding it:
+
+```bash
+python3 tools/market-import/import_prices.py --out autodonut_market.json
+/autodonuteconomy import autodonut_market.json
+```
+
+That pulls the public price list from
+[DonutSMP Terminal](https://www.donutsmpterminal.com) and converts it into
+AutoDonut's format. It's a script you run yourself, not something the mod does
+in the background — AutoDonut makes no network requests except the AI advisor.
+
+Two things to keep in mind. The page shows rounded prices, so `48K` imports as
+exactly 48,000. And they're *DonutSMP's* prices on *DonutSMP's* economy — on
+your own server treat them as a starting sanity-check, not truth. Your own
+`/ah` scans accumulate as real samples and will outvote the seed over time.
+
+See `tools/market-import/README.md` for filtering and merging options.
+
 ### Sharing price data between friends
 
 `/autodonuteconomy sharedb export <filename>` writes your local market
@@ -426,6 +449,72 @@ jump) — it never fakes an inventory-screen click with no screen open.
 - **Anti-AFK-kick nudge** — every 3-5 minutes (randomized), if nothing else
   is actively moving you, presses jump once — enough to reset most servers'
   AFK-kick timers without actually playing for you.
+
+## Block ESP / Base Finder (100% client-side)
+
+**Credit where it's due:** this feature exists because of
+[BaseFinder (Block ESP)](https://www.curseforge.com/minecraft/mc-mods/block-esp)
+by **ShadowsIsNothing**. That mod is All Rights Reserved, so AutoDonut uses
+**none of its code** — this is written from scratch. If you like the idea, go
+download the original too; it has a mini-map, entity detection and freecam that
+AutoDonut doesn't. Details in `CREDITS.md`.
+
+It highlights blocks you care about near you. By default that's the things that
+usually mean *somebody built here*: chests, trapped chests, barrels, ender
+chests, shulker boxes, hoppers, spawners and beacons.
+
+It is **read-only**. It looks at block data your client already has in memory
+and never interacts with anything — no clicking, no breaking, no movement.
+
+**Settings** (`K` > Block ESP, or `/autodonutesp`)
+
+| Setting | Default | What it does |
+|---|---|---|
+| Enable Block ESP | off | Master switch |
+| Draw boxes in the world | on | The visual highlight |
+| Scan radius | 32 | Horizontal search, 4–128 |
+| Vertical radius | 16 | How far up/down to look |
+| Max highlighted | 512 | Hit cap, nearest kept first |
+| Rescan every | 20 ticks | Lower = fresher, more CPU |
+
+```
+/autodonutesp                       Show status
+/autodonutesp on|off                Turn it on or off
+/autodonutesp list [count]          Nearest hits: coords, distance, bearing
+/autodonutesp radius <4-128>        Horizontal scan radius
+/autodonutesp height <1-128>        Vertical scan radius
+/autodonutesp boxes <true|false>    Toggle the in-world boxes
+/autodonutesp add <block> [#RRGGBB] Track a block, optionally in a colour
+/autodonutesp remove <block>        Stop tracking a block
+/autodonutesp clear                 Clear the whole tracking list
+```
+
+Block names accept either form: `chest` or `minecraft:chest`. Colours are
+`#RRGGBB`. An unknown block name is rejected with a message rather than
+silently ignored.
+
+### Two honest caveats
+
+**The boxes are depth-tested**, which means they're hidden behind terrain like
+any normal block outline. Drawing *through* walls needs a render layer with the
+depth test switched off, and Minecraft's rendering internals are the one area
+this project can't verify without the real game jar. Rather than give you a
+"see through walls" checkbox that quietly does nothing, the boxes are honest
+about what they are — and `/autodonutesp list` gives you coordinates, distance
+and a compass bearing for everything found, line of sight or not. That listing
+is genuinely most of what a base finder is for.
+
+**If the drawing ever breaks**, it switches itself off after one bad frame and
+tells you in `/autodonutesp status` instead of spamming your log sixty times a
+second. Detection, the config screen and `list` carry on working, because none
+of them touch rendering code.
+
+### Performance
+
+Scanning is on a timer and bounded. A radius of 32 with a vertical radius of 16
+is about 68,000 block checks every 20 ticks, which is cheap. Pushing the radius
+to 128 is roughly 16× that per scan — if you notice it, raise "Rescan every"
+rather than shrinking the radius, since the cost is scan time, not frame time.
 
 ## AI Advisor (optional, off unless you set a key)
 

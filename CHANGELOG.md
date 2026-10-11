@@ -30,6 +30,20 @@ Targets **Minecraft Java 26.2** on Fabric Loader `>=0.19.0`, Java 21+.
 All three clamp their radius to `player.blockInteractionRange()`, act at most
 once per tick, and stand down when you open a GUI yourself.
 
+### Block ESP / Base Finder
+
+Highlights configured blocks near you, with per-block colours, a bounded
+timer-driven scan, and `/autodonutesp list` for coordinates, distance and a
+compass bearing. Read-only — it never interacts with the world.
+
+Inspired by [BaseFinder (Block ESP)](https://www.curseforge.com/minecraft/mc-mods/block-esp)
+by **ShadowsIsNothing**, which is All Rights Reserved. No code from it is used;
+this is an independent implementation. See [`CREDITS.md`](CREDITS.md).
+
+Boxes are depth-tested; see-through-walls rendering needs a custom no-depth
+render layer that can't be verified offline. The renderer disables itself after
+one failed frame so detection keeps working regardless.
+
 ### Economy
 
 - Scans `/ah` listing tooltips into a local rolling-median price database
@@ -94,3 +108,14 @@ requests at all.** The key is stored only in `config/autodonut.json`.
 - Auto-relist is not implemented; it needs a confirmed AH lore format first.
 - Session stats are printed to chat rather than drawn as a HUD overlay.
 - Auto Smelter services one furnace at a time, not a furnace array.
+- Block ESP boxes do not draw through walls (see above). `/autodonutesp list`
+  is unaffected.
+- The price importer reads rounded figures from the page, so `48K` becomes
+  exactly 48,000.
+
+### Tools
+
+- `tools/market-import/` — seeds the price database from DonutSMP Terminal.
+  Standalone script, obeys `robots.txt`, caches, no scraped data in this repo.
+- `tools/offline-typecheck/` — type-checks `src/` against API stubs when the
+  real Minecraft artifacts can't be downloaded.
