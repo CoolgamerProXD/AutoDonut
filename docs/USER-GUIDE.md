@@ -549,7 +549,7 @@ machine it was developed on couldn't reach Maven Central to download the real
 Minecraft artifacts. That proves every line of AutoDonut's own code is
 internally consistent and correctly typed. It does **not** prove that every
 Minecraft signature it calls is spelled exactly right for 26.2 -
-`API-SURFACE.md` lists all 387 external members so that assumption is
+`API-SURFACE.md` lists all 396 external members so that assumption is
 reviewable rather than hidden.
 
 The authoritative check is `./gradlew build` (needs JDK 21+), which downloads

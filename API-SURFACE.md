@@ -2,7 +2,7 @@
 
 Every Minecraft, Fabric and library member AutoDonut depends on, in one place.
 
-**106 external types, 387 members.**
+**114 external types, 396 members.**
 
 ## Why this file exists
 
@@ -17,20 +17,34 @@ not patch, mixin or otherwise modify them - `mixins` is empty in
 `fabric.mod.json`. Nothing in this list is a server-side API: the mod declares
 `"environment": "client"` and has no `main` entrypoint.
 
+The rendering entries (`PoseStack`, `VertexConsumer`, `RenderType`,
+`MultiBufferSource`, `ShapeRenderer`, `WorldRenderContext`, `WorldRenderEvents`,
+`Camera`) are the **least certain** in this file - Minecraft's render internals
+change more than anything else. They are all reached from one class,
+`BlockEspRenderer`, which disables itself on error so the rest of the mod is
+unaffected if they're wrong.
+
 The list is kept minimal automatically. Any stub that can be deleted while the
 project still compiles is deleted, so every entry below is genuinely reached
 by AutoDonut's code.
 
 
+
 ## Minecraft
 
-*73 types, 315 members*
+*77 types, 319 members*
 
 
 ### `net.minecraft.ChatFormatting`
 
 *(type reference only - no members used)*
 
+
+### `net.minecraft.client.Camera`
+
+```java
+public net.minecraft.world.phys.Vec3 getPosition()
+```
 
 ### `net.minecraft.client.KeyMapping`
 
@@ -215,6 +229,23 @@ public net.minecraft.world.entity.player.Input keyPresses = net.minecraft.world.
 ```java
 public net.minecraft.client.multiplayer.ClientPacketListener connection
 public ClientInput input
+```
+
+### `net.minecraft.client.renderer.MultiBufferSource`
+
+*(type reference only - no members used)*
+
+
+### `net.minecraft.client.renderer.RenderType`
+
+```java
+public static RenderType lines()
+```
+
+### `net.minecraft.client.renderer.ShapeRenderer`
+
+```java
+public static void renderLineBox(com.mojang.blaze3d.vertex.PoseStack poseStack,
 ```
 
 ### `net.minecraft.commands.CommandBuildContext`
@@ -531,6 +562,7 @@ public boolean setBlock(BlockPos pos, BlockState state, int flags)
 public boolean setBlockAndUpdate(BlockPos pos, BlockState state)
 public boolean destroyBlock(BlockPos pos, boolean drop)
 public int getMinY()
+public int getHeight()
 public int getMaxY()
 public <T extends net.minecraft.world.entity.Entity> java.util.List<T> getEntitiesOfClass(Class<T> c, net.minecraft.world.phys.AABB box)
 public long getGameTime()
@@ -709,7 +741,7 @@ public double length()
 
 ## Fabric API / Loader
 
-*11 types, 12 members*
+*13 types, 14 members*
 
 
 ### `net.fabricmc.api.ClientModInitializer`
@@ -753,6 +785,18 @@ public static KeyMapping registerKeyMapping(KeyMapping mapping)
 public static final Event<AllowGame> ALLOW_GAME = null
 public static final Event<AllowChat> ALLOW_CHAT = null
 public static final Event<Chat> CHAT = null
+```
+
+### `net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext`
+
+*(type reference only - no members used)*
+
+
+### `net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents`
+
+```java
+public static final Event AFTER_TRANSLUCENT = new Event()
+public void register(java.util.function.Consumer<WorldRenderContext> listener)
 ```
 
 ### `net.fabricmc.fabric.api.client.screen.v1.ScreenEvents`
@@ -858,7 +902,7 @@ public <T> T getArgument(String name, Class<T> clazz)
 
 ## Mojang libraries
 
-*2 types, 3 members*
+*4 types, 6 members*
 
 
 ### `com.mojang.blaze3d.platform.InputConstants`
@@ -868,6 +912,19 @@ public static final int KEY_K = 75
 public static final Key UNKNOWN = new Key()
 public static class Key
 ```
+
+### `com.mojang.blaze3d.vertex.PoseStack`
+
+```java
+public void pushPose()
+public void popPose()
+public void translate(double x, double y, double z)
+```
+
+### `com.mojang.blaze3d.vertex.VertexConsumer`
+
+*(type reference only - no members used)*
+
 
 ### `com.mojang.serialization.MapCodec`
 

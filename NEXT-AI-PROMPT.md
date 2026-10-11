@@ -27,7 +27,7 @@ agent session. Everything it needs is in this file.
 | Block ESP / Base Finder | ✅ Done — detection solid, box rendering unverified |
 | Market price importer | ✅ Done — `tools/market-import/`, tests pass |
 | Server-side blocks | ✅ **Deleted.** The mod is client-only by construction |
-| Type-check | ✅ **Zero errors** across all 28 files (against API stubs — see [Build status](#build-status)) |
+| Type-check | ✅ **Zero errors** across all 31 files (against API stubs — see [Build status](#build-status)) |
 | Real `./gradlew build` | ❌ Still never run — Maven Central unreachable in the dev sandbox |
 
 **The headline:** AutoDonut is a client-only mod. `fabric.mod.json` declares
@@ -53,8 +53,8 @@ Minecraft artifacts could not be downloaded. Instead:
 1. A real Java compiler was obtained (ECJ 3.46, the Eclipse batch compiler,
    which is pure Java and runs on a bare JRE).
 2. Hand-written stubs were created for **every** external type the mod
-   touches — 106 types, 387 members.
-3. All 28 project sources were compiled against those stubs. **Zero errors.**
+   touches — 114 types, 396 members.
+3. All 31 project sources were compiled against those stubs. **Zero errors.**
 4. A warning pass (dead code, null dereference, unused, fallthrough,
    resource leaks, incomplete switch) found nothing of substance.
 
@@ -76,7 +76,7 @@ The harness is checked in at `tools/offline-typecheck/`:
 
 The stubs encode our *assumption* about each Minecraft signature. If a stub is
 wrong, the harness compiles happily and Gradle won't. **`API-SURFACE.md` is
-the review list** — all 106 types and 387 members in one file, grouped by
+the review list** — all 114 types and 396 members in one file, grouped by
 origin. If `./gradlew build` fails, the mismatch is in there and the compiler
 error will name the type.
 
